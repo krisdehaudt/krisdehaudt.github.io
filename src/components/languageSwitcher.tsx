@@ -19,7 +19,7 @@ export const LanguageSwitcher: FC<{ lang: string }> = ({ lang }) => {
                 leaveFrom="transform opacity-100 scale-100"
                 leaveTo="transform opacity-0 scale-95"
             >
-                <MenuItems anchor={{to: "bottom end", gap: "10px"}}>
+                <MenuItems className="bg-white" anchor={{to: "bottom end", gap: "10px"}}>
                     {
                         Object.values(Language).sort().map(value =>
                             <MenuItem>
