@@ -1,0 +1,17 @@
+---
+import Layout from "../../layouts/layout.astro";
+import Resume from "../../components/resume.astro";
+import {LanguageSwitcher} from "../../components/languageSwitcher";
+import { Language } from "../../data/data";
+
+const { lang } = Astro.params;
+
+export async function getStaticPaths() {
+    return Object.values(Language).map(value => ({ params: { lang: value } }));
+}
+---
+
+<Layout title="CV - Kris Dehaudt" lang={lang}>
+    <LanguageSwitcher lang={lang} slot="header" client:load />
+    <Resume lang={lang} />
+</Layout>

@@ -1,0 +1,7 @@
+<script is:inline>
+    const browserLanguage = navigator.language || navigator.userLanguage || "en";
+    const shortLang = browserLanguage.indexOf("-") !== -1 ? browserLanguage.split("-")[0].toLowerCase() : browserLanguage.toLowerCase();
+    const supportedLanguages = ["nl", "en"];
+    const targetLang = supportedLanguages.includes(shortLang) ? shortLang : "en";
+    window.location.href = "/" + targetLang;
+</script>

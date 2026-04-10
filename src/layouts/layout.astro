@@ -1,0 +1,61 @@
+---
+import "../styles/global.css";
+import { Language, data, genericData } from "../data/data";
+
+const { lang, jsonLd } = Astro.props;
+const baseUrl = "https://krisdehaudt.github.io";
+const languages = Object.values(Language);
+const resumeData = lang === Language.NL ? data.nl : data.en;
+
+const defaultJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Kris Dehaudt",
+    "jobTitle": resumeData.experience[0].title,
+    "url": baseUrl,
+    "email": genericData.contact.email,
+    "address": {
+        "@type": "PostalAddress",
+        "streetAddress": genericData.contact.address.street,
+        "addressLocality": genericData.contact.address.city,
+        "postalCode": genericData.contact.address.postalCode,
+        "addressCountry": "BE"
+    },
+    "worksFor": {
+        "@type": "Organization",
+        "name": resumeData.experience[0].company
+    },
+    "sameAs": []
+};
+
+const seoJsonLd = jsonLd || defaultJsonLd;
+---
+
+<!doctype html>
+<html lang={lang}>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="generator" content={Astro.generator} />
+
+		<link rel="icon" href="/favicon.png" />
+
+		{languages.map(l => 
+			<link rel="alternate" hreflang={l} href={`${baseUrl}/${l}`} />
+		)}
+
+		<link rel="canonical" href={`${baseUrl}/${lang}`} />
+
+		<title>Kris Dehaudt</title>
+
+		<script type="application/ld+json" set:html={JSON.stringify(seoJsonLd)} />
+	</head>
+	<body class="bg-gray-50 text-gray-900 font-sans antialiased print:bg-white print:text-black">
+		<header class="flex justify-end print:hidden max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-5">
+			<slot name="header" />
+		</header>
+		<main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+			<slot />
+		</main>
+	</body>
+</html>

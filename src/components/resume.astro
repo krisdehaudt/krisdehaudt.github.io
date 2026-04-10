@@ -1,0 +1,156 @@
+---
+import { data, genericData, Language } from "../data/data";
+import {
+    FaMapMarkerAlt,
+    FaEnvelope,
+    FaPhone,
+    FaBriefcase,
+    FaGraduationCap,
+    FaTools,
+    FaLinkedin,
+} from "react-icons/fa";
+
+const { lang } = Astro.props;
+const resumeData = lang === Language.NL ? data.nl : data.en;
+---
+
+<div class="flex flex-col gap-8">
+    <header
+        class="p-8 flex flex-row gap-4 bg-linear-to-br from-slate-900 via-slate-800 to-slate-700 rounded-2xl text-white print:text-black"
+    >
+        <img
+            src="/profile.jpg"
+            alt="Kris Dehaudt"
+            class="w-28 h-28 sm:w-32 sm:h-32 rounded-full object-cover border-4 border-white/20 shadow-2xl print:border-0 print:shadow-none"
+        />
+        <div class="flex flex-col justify-center grow">
+            <h1 class="text-3xl sm:text-4xl font-bold tracking-tight">
+                Kris Dehaudt
+            </h1>
+            <p class="text-lg mt-2">{resumeData.experience[0].title}</p>
+        </div>
+        <div
+            class="flex flex-col justify-center gap-2 bg-white/10 rounded-xl p-4"
+        >
+            <div class="flex items-center gap-3">
+                <FaMapMarkerAlt
+                    className="w-4 h-4 text-primary print:text-gray-700"
+                />
+                <span>{genericData.contact.address.fullAddress}</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <FaEnvelope
+                    className="w-4 h-4 text-primary print:text-gray-700"
+                />
+                <a
+                    href={`mailto:${genericData.contact.email}`}
+                    class="hover:text-primary">{genericData.contact.email}</a
+                >
+            </div>
+            <div class="flex items-center gap-3">
+                <FaPhone className="w-4 h-4 text-primary print:text-gray-700" />
+                <a
+                    href={`tel:${genericData.contact.phone}`}
+                    class="hover:text-primary">{genericData.contact.phone}</a
+                >
+            </div>
+            <div class="flex items-center gap-3">
+                <FaLinkedin className="w-4 h-4 text-primary print:text-gray-700" />
+                <a
+                    href={genericData.contact.linkedin}
+                    class="hover:text-primary">{genericData.contact.linkedin}</a
+                >
+            </div>
+        </div>
+    </header>
+
+    <section
+        class="bg-linear-to-r from-primary/5 to-gray-50 rounded-2xl p-6 border-l-4 border-primary print:bg-white print:bg-none print:border-0"
+    >
+        <p class="text-gray-700 leading-relaxed text-lg print:text-black">
+            {resumeData.texts.profileIntro}
+        </p>
+    </section>
+
+    <section>
+        <div class="flex items-center gap-3 mb-6">
+            <div class="p-3 bg-primary/10 rounded-xl">
+                <FaBriefcase className="w-5 h-5 text-primary" />
+            </div>
+            <h2 class="text-2xl font-bold">{resumeData.texts.experience}</h2>
+        </div>
+        <div class="space-y-8">
+            {
+                resumeData.experience.map((job) => (
+                    <div class="">
+                        <div class="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2">
+                            <h3 class="text-lg font-semibold">{job.title}</h3>
+                            <span class="inline-flex items-center px-3 py-1 bg-slate-100 text-slate-600 text-sm font-medium rounded-full">
+                                {job.period}
+                            </span>
+                        </div>
+                        <p class="text-primary font-medium mt-1">
+                            {job.company}
+                        </p>
+                        <ul class="mt-3 list-disc list-inside text-gray-600">
+                            {job.descriptions.map((desc) => (
+                                <li>{desc}</li>
+                            ))}
+                        </ul>
+                    </div>
+                ))
+            }
+        </div>
+    </section>
+
+    <section>
+        <div class="flex items-center gap-3 mb-6">
+            <div class="p-3 bg-primary/10 rounded-xl">
+                <FaGraduationCap className="w-5 h-5 text-primary" />
+            </div>
+            <h2 class="text-2xl font-bold">{resumeData.texts.education}</h2>
+        </div>
+        <div class="space-y-6">
+            {
+                resumeData.educations.map((edu) => (
+                    <div class="">
+                        <div class="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2">
+                            <h3 class="font-semibold">{edu.title}</h3>
+                            <span class="inline-flex items-center px-3 py-1 bg-slate-100 text-slate-600 text-sm font-medium rounded-full">
+                                {edu.period}
+                            </span>
+                        </div>
+                        <p class="text-gray-600 text-sm mt-1">{edu.school}</p>
+                    </div>
+                ))
+            }
+        </div>
+    </section>
+
+    <section>
+        <div class="flex items-center gap-3 mb-6">
+            <div class="p-3 bg-primary/10 rounded-xl">
+                <FaTools className="w-5 h-5 text-primary" />
+            </div>
+            <h2 class="text-2xl font-bold">{resumeData.texts.skills}</h2>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {
+                resumeData.skills.map((skillCategory) => (
+                    <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-primary/20 transition-all">
+                        <h3 class="font-semibold mb-3 text-sm uppercase tracking-wider text-primary">
+                            {skillCategory.category}
+                        </h3>
+                        <div class="flex flex-wrap gap-2">
+                            {skillCategory.items.map((skill) => (
+                                <span class="px-3 py-1.5 bg-slate-50 text-gray-700 text-sm rounded-lg hover:bg-primary hover:text-white transition-colors cursor-default">
+                                    {skill}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                ))
+            }
+        </div>
+    </section>
+</div>
