@@ -2,16 +2,57 @@
 import Layout from "../../layouts/layout.astro";
 import Resume from "../../components/resume.astro";
 import {LanguageSwitcher} from "../../components/languageSwitcher";
-import { Language } from "../../data/data";
+import { data, genericData, Language } from "../../data/data";
 
 const { lang } = Astro.params;
+const siteData = lang === Language.NL ? data.nl : data.en;
+const canonicalUrl = `${genericData.profile.baseUrl}/${lang}`;
+const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+        {
+            "@type": "ProfessionalService",
+            "name": genericData.profile.name,
+            "url": canonicalUrl,
+            "description": siteData.seo.description,
+            "areaServed": "Belgium",
+            "address": {
+                "@type": "PostalAddress",
+                "streetAddress": genericData.contact.address.street,
+                "addressLocality": genericData.contact.address.city,
+                "postalCode": genericData.contact.address.postalCode,
+                "addressCountry": "BE"
+            },
+            "telephone": genericData.contact.phone,
+            "email": genericData.contact.email,
+            "sameAs": [genericData.contact.linkedin],
+            "serviceType": siteData.services.items.map((item) => item.name)
+        },
+        {
+            "@type": "Person",
+            "name": genericData.profile.name,
+            "url": canonicalUrl,
+            "jobTitle": siteData.hero.title,
+            "sameAs": [genericData.contact.linkedin],
+            "knowsAbout": siteData.skills.groups.flatMap((group) => group.items)
+        }
+    ]
+};
 
 export async function getStaticPaths() {
     return Object.values(Language).map(value => ({ params: { lang: value } }));
 }
 ---
 
-<Layout title="CV - Kris Dehaudt" lang={lang}>
+<Layout
+    lang={lang}
+    title={siteData.seo.title}
+    description={siteData.seo.description}
+    ogTitle={siteData.seo.ogTitle}
+    ogDescription={siteData.seo.ogDescription}
+    keywords={siteData.seo.keywords.join(", ")}
+    jsonLd={jsonLd}
+>
     <LanguageSwitcher lang={lang} slot="header" client:load />
     <Resume lang={lang} />
 </Layout>

@@ -1,0 +1,42 @@
+#!/bin/sh
+
+set -eu
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
+
+STAGED_FILES="$(git diff --cached --name-only --diff-filter=ACMR)"
+
+if [ -z "$STAGED_FILES" ]; then
+    exit 0
+fi
+
+SHOULD_REFRESH_PDFS=0
+
+for file in $STAGED_FILES; do
+    case "$file" in
+        src/data/data.ts|scripts/generate-cv-pdfs.ts|package.json|package-lock.json)
+            SHOULD_REFRESH_PDFS=1
+            break
+            ;;
+    esac
+done
+
+if [ "$SHOULD_REFRESH_PDFS" -ne 1 ]; then
+    exit 0
+fi
+
+if [ -s "$HOME/.nvm/nvm.sh" ]; then
+    # shellcheck disable=SC1090
+    . "$HOME/.nvm/nvm.sh"
+    nvm use >/dev/null
+fi
+
+if ! command -v npm >/dev/null 2>&1; then
+    echo "pre-commit: npm is not available; cannot refresh CV PDFs." >&2
+    exit 1
+fi
+
+echo "pre-commit: refreshing CV PDFs"
+npm run cv:pdf
+git add public/Kris-Dehaudt-CV-en.pdf public/Kris-Dehaudt-CV-nl.pdf

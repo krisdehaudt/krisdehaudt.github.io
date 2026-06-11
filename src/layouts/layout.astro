@@ -2,18 +2,37 @@
 import "../styles/global.css";
 import { Language, data, genericData } from "../data/data";
 
-const { lang, jsonLd } = Astro.props;
-const baseUrl = "https://krisdehaudt.github.io";
+const { lang, jsonLd, title, description, ogTitle, ogDescription, keywords, canonicalUrl: canonicalOverride } = Astro.props;
+const baseUrl = genericData.profile.baseUrl;
 const languages = Object.values(Language);
-const resumeData = lang === Language.NL ? data.nl : data.en;
+const siteData = lang === Language.NL ? data.nl : data.en;
+const pageTitle = title || siteData.seo.title;
+const pageDescription = description || siteData.seo.description;
+const pageOgTitle = ogTitle || siteData.seo.ogTitle;
+const pageOgDescription = ogDescription || siteData.seo.ogDescription;
+const pageKeywords = keywords || siteData.seo.keywords.join(", ");
+const canonicalUrl = canonicalOverride || `${baseUrl}/${lang}`;
+const hasHeaderSlot = Astro.slots.has("header");
+const alternateLanguages = [
+    ...languages.map((language) => ({
+        language,
+        href: `${baseUrl}/${language}`
+    })),
+    {
+        language: "x-default",
+        href: `${baseUrl}/en`
+    }
+];
 
 const defaultJsonLd = {
     "@context": "https://schema.org",
     "@type": "Person",
-    "name": "Kris Dehaudt",
-    "jobTitle": resumeData.experience[0].title,
+    "name": genericData.profile.name,
+    "jobTitle": siteData.hero.title,
     "url": baseUrl,
     "email": genericData.contact.email,
+    "telephone": genericData.contact.phone,
+    "description": pageDescription,
     "address": {
         "@type": "PostalAddress",
         "streetAddress": genericData.contact.address.street,
@@ -21,11 +40,27 @@ const defaultJsonLd = {
         "postalCode": genericData.contact.address.postalCode,
         "addressCountry": "BE"
     },
-    "worksFor": {
-        "@type": "Organization",
-        "name": resumeData.experience[0].company
+    "image": `${baseUrl}${genericData.profile.headshot}`,
+    "knowsAbout": siteData.skills.groups.flatMap((group) => group.items),
+    "sameAs": [genericData.contact.linkedin],
+    "hasOccupation": {
+        "@type": "Occupation",
+        "name": siteData.hero.title,
+        "occupationLocation": {
+            "@type": "Country",
+            "name": "Belgium"
+        },
+        "skills": siteData.skills.groups.flatMap((group) => group.items).join(", ")
     },
-    "sameAs": []
+    "makesOffer": {
+        "@type": "Offer",
+        "itemOffered": {
+            "@type": "Service",
+            "name": "Freelance cloud, IoT, and software consulting",
+            "serviceType": siteData.services.items.map((item) => item.name).join(", "),
+            "areaServed": "Belgium"
+        }
+    }
 };
 
 const seoJsonLd = jsonLd || defaultJsonLd;
@@ -37,24 +72,40 @@ const seoJsonLd = jsonLd || defaultJsonLd;
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta name="generator" content={Astro.generator} />
+        <meta name="description" content={pageDescription} />
+        <meta name="keywords" content={pageKeywords} />
+        <meta name="robots" content="index, follow" />
 
 		<link rel="icon" href="/favicon.png" />
 
-		{languages.map(l => 
-			<link rel="alternate" hreflang={l} href={`${baseUrl}/${l}`} />
+		{alternateLanguages.map(({ language, href }) => 
+			<link rel="alternate" hreflang={language} href={href} />
 		)}
 
-		<link rel="canonical" href={`${baseUrl}/${lang}`} />
+		<link rel="canonical" href={canonicalUrl} />
 
-		<title>Kris Dehaudt</title>
+		<title>{pageTitle}</title>
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content={genericData.profile.name} />
+        <meta property="og:title" content={pageOgTitle} />
+        <meta property="og:description" content={pageOgDescription} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content={`${baseUrl}${genericData.profile.headshot}`} />
+        <meta property="og:locale" content={lang === Language.NL ? "nl_BE" : "en_US"} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageOgTitle} />
+        <meta name="twitter:description" content={pageOgDescription} />
+        <meta name="twitter:image" content={`${baseUrl}${genericData.profile.headshot}`} />
 
 		<script type="application/ld+json" set:html={JSON.stringify(seoJsonLd)} />
 	</head>
-	<body class="bg-gray-50 text-gray-900 font-sans antialiased print:bg-white print:text-black">
+	<body class="bg-[linear-gradient(180deg,#f6f7f4_0%,#eef4fb_40%,#f8fafc_100%)] text-gray-900 font-sans antialiased print:bg-white print:text-black">
+        {hasHeaderSlot && (
 		<header class="flex justify-end print:hidden max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-5">
 			<slot name="header" />
 		</header>
-		<main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        )}
+		<main class={`max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 ${hasHeaderSlot ? "py-8 md:py-10 lg:py-12" : "py-6 md:py-8 lg:py-10 print:py-0"}`}>
 			<slot />
 		</main>
 	</body>
